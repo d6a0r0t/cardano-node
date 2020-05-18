@@ -150,8 +150,8 @@ data QueryCmd
   = QueryPoolId NodeAddress
   | QueryProtocolParameters Network (Maybe OutputFile)
   | QueryTip Network
-  | QueryFilteredUTxO Address Network (Maybe OutputFile)
   | QueryStakeDistribution Network (Maybe OutputFile)
+  | QueryUTxO QueryFilter Network (Maybe OutputFile)
   | QueryVersion NodeAddress
   | QueryStatus NodeAddress
   deriving (Eq, Show)

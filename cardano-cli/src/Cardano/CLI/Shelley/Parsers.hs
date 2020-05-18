@@ -361,10 +361,11 @@ pQueryCmd =
           (Opt.info pQueryProtocolParameters $ Opt.progDesc "Get the node's current protocol parameters")
       , Opt.command "tip"
           (Opt.info pQueryTip $ Opt.progDesc "Get the node's current tip (slot no, hash, block no)")
-      , Opt.command "filtered-utxo"
-          (Opt.info pQueryFilteredUTxO $ Opt.progDesc "Get the node's current UTxO filtered by address")
       , Opt.command "stake-distribution"
           (Opt.info pQueryStakeDistribution $ Opt.progDesc "Get the node's current aggregated stake distribution")
+      , Opt.command "utxo"
+          (Opt.info pQueryUTxO $ Opt.progDesc "Get the node's current UTxO with the option of \
+                                              \filtering by address(es)")
       , Opt.command "version"
           (Opt.info pQueryVersion $ Opt.progDesc "Get the node version")
       , Opt.command "status"
@@ -383,10 +384,10 @@ pQueryCmd =
     pQueryTip :: Parser QueryCmd
     pQueryTip = QueryTip <$> pNetwork
 
-    pQueryFilteredUTxO :: Parser QueryCmd
-    pQueryFilteredUTxO =
-      QueryFilteredUTxO
-        <$> pHexEncodedAddress
+    pQueryUTxO :: Parser QueryCmd
+    pQueryUTxO =
+      QueryUTxO
+        <$> pQueryFilter
         <*> pNetwork
         <*> pMaybeOutputFile
 
@@ -888,12 +889,22 @@ pTxOutCount =
       <> Opt.help "The number of transaction outputs."
       )
 
+pQueryFilter :: Parser QueryFilter
+pQueryFilter = pManyAddresses <|> pNoQueryFilter
+  where
+    pManyAddresses :: Parser QueryFilter
+    pManyAddresses = Address <$> many pHexEncodedAddress
+    pNoQueryFilter :: Parser QueryFilter
+    pNoQueryFilter = Opt.flag' NoFilter ( Opt.long "no-filter"
+                                        <> Opt.help "No filtering in the UTxO query."
+                                        )
+
 pHexEncodedAddress :: Parser Address
 pHexEncodedAddress =
   Opt.option (Opt.maybeReader (addressFromHex . Text.pack))
     (  Opt.long "address"
     <> Opt.metavar "ADDRESS"
-    <> Opt.help "A hex-encoded Cardano address."
+    <> Opt.help "Filter by Cardano address(es) (hex-encoded)."
     )
 
 pAddress :: Parser Text
@@ -1049,6 +1060,7 @@ pShelleyPParamsUpdate =
     <*> (maybeToStrictMaybe <$> pDecentralParam)
     <*> (maybeToStrictMaybe <$> pExtraEntropy)
     <*> (maybeToStrictMaybe <$> pProtocolVersion)
+    <*> (maybeToStrictMaybe <$> pMinUTxOValue)
 
 pMinFeeLinearFactor :: Parser (Maybe Natural)
 pMinFeeLinearFactor =
@@ -1064,6 +1076,14 @@ pMinFeeConstantFactor =
     (  Opt.long "min-fee-constant"
     <> Opt.metavar "NATURAL"
     <> Opt.help "The constant factor for the minimum fee calculation."
+    )
+
+pMinUTxOValue :: Parser (Maybe Natural)
+pMinUTxOValue =
+  Opt.option Opt.auto
+    (  Opt.long "min-utxo-value"
+    <> Opt.metavar "NATURAL"
+    <> Opt.help "The minimum allowed UTxO value."
     )
 
 pMaxBodySize :: Parser (Maybe Natural)
