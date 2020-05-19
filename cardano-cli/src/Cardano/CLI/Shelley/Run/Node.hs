@@ -6,29 +6,37 @@ module Cardano.CLI.Shelley.Run.Node
 import           Cardano.Prelude
 
 import           Control.Monad.Trans.Except (ExceptT)
-import           Control.Monad.Trans.Except.Extra (firstExceptT, newExceptT)
+import           Control.Monad.Trans.Except.Extra (firstExceptT, left, right,
+                   newExceptT)
 
-import           Cardano.Api (ApiError, GenesisVerificationKey(..), EpochNo,
-                  ShelleyPParamsUpdate, Update (..), createShelleyUpdateProposal,
-                  hashKey, readGenesisVerificationKey, writeUpdate)
+import           Cardano.Api (ApiError, EpochNo, PParams'(..),
+                   ShelleyPParamsUpdate, StrictMaybe (..),
+                   Update (..), createShelleyUpdateProposal, hashKey,
+                   writeUpdate)
 
 import           Cardano.Config.Shelley.ColdKeys hiding (writeSigningKey)
 import           Cardano.Config.Shelley.KES
 import           Cardano.Config.Shelley.OCert
 import           Cardano.Config.Shelley.VRF
 
+import           Cardano.Config.Shelley.ColdKeys (KeyError, readVerKey)
 import           Cardano.Config.Types (SigningKeyFile(..))
 
 import           Cardano.CLI.Shelley.Commands
 import           Cardano.CLI.Shelley.KeyGen
 
+
 data ShelleyNodeCmdError
   = ShelleyNodeCmdKeyError !KeyError
   | ShelleyNodeCmdOperationalCertError !OperationalCertError
   | ShelleyNodeCmdCardanoApiError !ApiError
+  | ShelleyNodeCmdReadKeyError !KeyError
   | ShelleyNodeCmdKESError !KESError
   | ShelleyNodeCmdVRFError !VRFError
   | ShelleyNodeCmdKeyGenError !ShelleyKeyGenError
+  -- TODO: Create a module for the shelley update proposal stuff and
+  -- create a custom error type there i.e ShelleyUpdateProposalError
+  | ShelleyNodeCmdUpdateProposalErrorEmptyUpdateProposal
   deriving Show
 
 
@@ -121,14 +129,44 @@ runNodeUpdateProposal
   -- ^ Genesis verification keys
   -> ShelleyPParamsUpdate
   -> ExceptT ShelleyNodeCmdError IO ()
-runNodeUpdateProposal (OutputFile upFile) eNo genVerKeyFiles upPprams = do
+runNodeUpdateProposal (OutputFile upFile) eNo genVerKeyFiles upPprams' = do
+  upPprams <- checkForEmptyProposal upPprams'
   genVKeys <- mapM
                 (\(VerificationKeyFile fp) -> do
-                  GenesisVerificationKeyShelley gvk <-
-                    firstExceptT ShelleyNodeCmdCardanoApiError $ newExceptT $ readGenesisVerificationKey fp
+                  gvk <- firstExceptT ShelleyNodeCmdReadKeyError $ readVerKey GenesisKey fp
                   pure gvk
                 )
                 genVerKeyFiles
   let genKeyHashes = map hashKey genVKeys
       upProp = ShelleyUpdate $ createShelleyUpdateProposal eNo genKeyHashes upPprams
   firstExceptT ShelleyNodeCmdCardanoApiError . newExceptT $ writeUpdate upFile upProp
+  where
+    checkForEmptyProposal :: ShelleyPParamsUpdate -> ExceptT ShelleyNodeCmdError IO ShelleyPParamsUpdate
+    checkForEmptyProposal sPParams
+      | sPParams == emptyPParamsUpdate = left ShelleyNodeCmdUpdateProposalErrorEmptyUpdateProposal
+      | otherwise = right sPParams
+
+-- TODO: Import from shelley ledger specs
+emptyPParamsUpdate :: ShelleyPParamsUpdate
+emptyPParamsUpdate =
+  PParams
+    { _minfeeA = SNothing,
+      _minfeeB = SNothing,
+      _maxBBSize = SNothing,
+      _maxTxSize = SNothing,
+      _maxBHSize = SNothing,
+      _keyDeposit = SNothing,
+      _keyMinRefund = SNothing,
+      _keyDecayRate = SNothing,
+      _poolDeposit = SNothing,
+      _poolMinRefund = SNothing,
+      _poolDecayRate = SNothing,
+      _eMax = SNothing,
+      _nOpt = SNothing,
+      _a0 = SNothing,
+      _rho = SNothing,
+      _tau = SNothing,
+      _d = SNothing,
+      _extraEntropy = SNothing,
+      _protocolVersion = SNothing
+    }

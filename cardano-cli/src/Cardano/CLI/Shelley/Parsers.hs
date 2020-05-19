@@ -1059,71 +1059,79 @@ pShelleyPParamsUpdate =
 
 pMinFeeLinearFactor :: Parser (Maybe Natural)
 pMinFeeLinearFactor =
-  Opt.option Opt.auto
-    (  Opt.long "min-fee-linear"
-    <> Opt.metavar "NATURAL"
-    <> Opt.help "The linear factor for the minimum fee calculation."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "min-fee-linear"
+        <> Opt.metavar "NATURAL"
+        <> Opt.help "The linear factor for the minimum fee calculation."
+        )
 
 pMinFeeConstantFactor :: Parser (Maybe Natural)
 pMinFeeConstantFactor =
-  Opt.option Opt.auto
-    (  Opt.long "min-fee-constant"
-    <> Opt.metavar "NATURAL"
-    <> Opt.help "The constant factor for the minimum fee calculation."
-    )
+  optional
+  $ Opt.option Opt.auto
+      (  Opt.long "min-fee-constant"
+      <> Opt.metavar "NATURAL"
+      <> Opt.help "The constant factor for the minimum fee calculation."
+      )
 
 pMaxBodySize :: Parser (Maybe Natural)
 pMaxBodySize =
-  Opt.option Opt.auto
-    (  Opt.long "max-block-body-size"
-    <> Opt.metavar "NATURAL"
-    <> Opt.help "Maximal block body size."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "max-block-body-size"
+        <> Opt.metavar "NATURAL"
+        <> Opt.help "Maximal block body size."
+        )
 
 pMaxTransactionSize :: Parser (Maybe Natural)
 pMaxTransactionSize =
-  Opt.option Opt.auto
-    (  Opt.long "max-tx-size"
-    <> Opt.metavar "NATURAL"
-    <> Opt.help "Maximum transaction size."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "max-tx-size"
+        <> Opt.metavar "NATURAL"
+        <> Opt.help "Maximum transaction size."
+        )
 
 pMaxBlockHeaderSize :: Parser (Maybe Natural)
 pMaxBlockHeaderSize =
-  Opt.option Opt.auto
-    (  Opt.long "max-block-header-size"
-    <> Opt.metavar "NATURAL"
-    <> Opt.help "Maximum block header size."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "max-block-header-size"
+        <> Opt.metavar "NATURAL"
+        <> Opt.help "Maximum block header size."
+        )
 
 pKeyRegistDeposit :: Parser (Maybe ShelleyCoin)
 pKeyRegistDeposit =
-  optional $
-    Shelley.Coin
-      <$> Opt.option Opt.auto
-            (  Opt.long "key-reg-deposit-amt"
-            <> Opt.metavar "INT"
-            <> Opt.help "Key registration deposit amount."
-            )
+  optional
+    $ Shelley.Coin
+        <$> Opt.option Opt.auto
+              (  Opt.long "key-reg-deposit-amt"
+              <> Opt.metavar "INT"
+              <> Opt.help "Key registration deposit amount."
+              )
 
 
 
 pMinRefund :: Parser (Maybe UnitInterval)
 pMinRefund =
-  Opt.option (mkUnitInterval <$> Opt.auto)
-    (  Opt.long "min-percent-refund"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "The refund guarantee minimum percent."
-    )
+  join <$> ( optional
+               $ Opt.option (fromDouble <$> Opt.auto)
+                 (  Opt.long "min-percent-refund"
+                 <> Opt.metavar "DOUBLE"
+                 <> Opt.help "The refund guarantee minimum percent."
+                 )
+           )
 
 pDepositDecay :: Parser (Maybe Rational)
 pDepositDecay =
-  Opt.option Opt.auto
-    (  Opt.long "deposit-decay-rate"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "The deposit decay rate."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "deposit-decay-rate"
+        <> Opt.metavar "DOUBLE"
+        <> Opt.help "The deposit decay rate."
+        )
 
 pPoolDeposit :: Parser (Maybe ShelleyCoin)
 pPoolDeposit =
@@ -1138,19 +1146,22 @@ pPoolDeposit =
 
 pPoolMinRefund :: Parser (Maybe UnitInterval)
 pPoolMinRefund =
-  Opt.option (mkUnitInterval <$> Opt.auto)
-    (  Opt.long "min-pool-percent-refund"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "The pool refund minimum percent."
-    )
+  join <$> ( optional
+              $ Opt.option (fromDouble <$> Opt.auto)
+                  (  Opt.long "min-pool-percent-refund"
+                  <> Opt.metavar "DOUBLE"
+                  <> Opt.help "The pool refund minimum percent."
+                  )
+           )
 
 pPoolDecayRate :: Parser (Maybe Rational)
 pPoolDecayRate =
-  Opt.option Opt.auto
-    (  Opt.long "pool-deposit-decay-rate"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "Decay rate for pool deposits."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "pool-deposit-decay-rate"
+        <> Opt.metavar "DOUBLE"
+        <> Opt.help "Decay rate for pool deposits."
+        )
 
 
 pEpochBoundRetirement :: Parser (Maybe EpochNo)
@@ -1167,43 +1178,52 @@ pEpochBoundRetirement =
 
 pNumberOfPools :: Parser (Maybe Natural)
 pNumberOfPools =
-  Opt.option Opt.auto
-    (  Opt.long "number-of-pools"
-    <> Opt.metavar "NATURAL"
-    <> Opt.help "Desired number of pools."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "number-of-pools"
+        <> Opt.metavar "NATURAL"
+        <> Opt.help "Desired number of pools."
+        )
 
 pPoolInfluence :: Parser (Maybe Rational)
 pPoolInfluence =
-  Opt.option Opt.auto
-    (  Opt.long "pool-influence"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "Pool influence."
-    )
+  optional
+    $ Opt.option Opt.auto
+        (  Opt.long "pool-influence"
+        <> Opt.metavar "DOUBLE"
+        <> Opt.help "Pool influence."
+        )
 
 pTreasuryExpansion :: Parser (Maybe UnitInterval)
 pTreasuryExpansion =
-  Opt.option (mkUnitInterval <$> Opt.auto)
-    (  Opt.long "treasury-expansion"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "Treasury expansion."
-    )
+  join <$> ( optional
+               $ Opt.option (fromDouble <$> Opt.auto)
+                   (  Opt.long "treasury-expansion"
+                   <> Opt.metavar "DOUBLE"
+                   <> Opt.help "Treasury expansion."
+                   )
+           )
 
 pMonetaryExpansion :: Parser (Maybe UnitInterval)
 pMonetaryExpansion =
-  Opt.option (mkUnitInterval <$> Opt.auto)
-    (  Opt.long "monetary-expansion"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "Monetary expansion."
-    )
+  join <$> ( optional
+               $ Opt.option (fromDouble <$> Opt.auto)
+                  (  Opt.long "monetary-expansion"
+                  <> Opt.metavar "DOUBLE"
+                  <> Opt.help "Monetary expansion."
+                  )
+           )
 
 pDecentralParam :: Parser (Maybe UnitInterval)
 pDecentralParam =
-  Opt.option (mkUnitInterval <$> Opt.auto)
-    (  Opt.long "decentralization-parameter"
-    <> Opt.metavar "DOUBLE"
-    <> Opt.help "Decentralization parameter."
-    )
+  join <$> ( optional
+               $ Opt.option (fromDouble <$> Opt.auto)
+                          (  Opt.long "decentralization-parameter"
+                          <> Opt.metavar "DOUBLE"
+                          <> Opt.help "Decentralization parameter."
+                          )
+           )
+
 
 pExtraEntropy :: Parser (Maybe Nonce)
 pExtraEntropy =
@@ -1234,3 +1254,10 @@ pProtocolVersion =
             <> Opt.help "Minor protocol version. An increase indicates a soft fork\
                         \ (old software canvalidate but not produce new blocks)."
             )
+
+--------------------------------------------------------------------------------
+-- Helpers
+--------------------------------------------------------------------------------
+
+fromDouble :: Double -> Maybe UnitInterval
+fromDouble = mkUnitInterval . toRational
