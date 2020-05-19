@@ -64,10 +64,10 @@ parseShelleyCommands =
           (Opt.info (BlockCmd <$> pBlockCmd) $ Opt.progDesc "Shelley block commands")
       , Opt.command "system"
           (Opt.info (SystemCmd <$> pSystemCmd) $ Opt.progDesc "Shelley system commands")
-      , Opt.command "devops"
-          (Opt.info (DevOpsCmd <$> pDevOpsCmd) $ Opt.progDesc "Shelley devops commands")
       , Opt.command "genesis"
           (Opt.info (GenesisCmd <$> pGenesisCmd) $ Opt.progDesc "Shelley genesis block commands")
+      , Opt.command "governance"
+          (Opt.info (GovernanceCmd <$> pDevOpsCmd) $ Opt.progDesc "Shelley governance commands")
       , Opt.command "text-view"
           (Opt.info (TextViewCmd <$> pTextViewCmd) . Opt.progDesc $
              mconcat
@@ -290,9 +290,6 @@ pNodeCmd =
       , Opt.command "issue-op-cert"
           (Opt.info pIssueOpCert $
              Opt.progDesc "Issue a node operational certificate")
-      , Opt.command "create-update-proposal"
-          (Opt.info pUpdateProposal $
-            Opt.progDesc "Create an update proposal")
       ]
   where
     pKeyGenOperator :: Parser NodeCmd
@@ -316,13 +313,6 @@ pNodeCmd =
                       <*> pOperatorCertIssueCounterFile
                       <*> pKesPeriod
                       <*> pOutputFile
-
-    pUpdateProposal :: Parser NodeCmd
-    pUpdateProposal = NodeUpdateProposal
-                        <$> pOutputFile
-                        <*> pEpochNoUpdateProp
-                        <*> some pGenesisVerificationKeyFile
-                        <*> pShelleyPParamsUpdate
 
 
 pPoolCmd :: Parser PoolCmd
@@ -421,21 +411,31 @@ pBlockCmd =
     pBlockInfo :: Parser BlockCmd
     pBlockInfo = BlockInfo <$> pBlockId <*> parseNodeAddress
 
-pDevOpsCmd :: Parser DevOpsCmd
+pDevOpsCmd :: Parser GovernanceCmd
 pDevOpsCmd =
   Opt.subparser $
     mconcat
-      [ Opt.command "protocol-update"
+      [ Opt.command "create-update-proposal"
+          (Opt.info pUpdateProposal $
+            Opt.progDesc "Create an update proposal")
+      , Opt.command "protocol-update"
           (Opt.info pProtocolUpdate $ Opt.progDesc "Protocol update")
       , Opt.command "cold-keys"
           (Opt.info pColdKeys $ Opt.progDesc "Cold keys")
       ]
   where
-    pProtocolUpdate :: Parser DevOpsCmd
-    pProtocolUpdate = DevOpsProtocolUpdate <$> pPrivKeyFile
+    pUpdateProposal :: Parser GovernanceCmd
+    pUpdateProposal = GovernanceUpdateProposal
+                        <$> pOutputFile
+                        <*> pEpochNoUpdateProp
+                        <*> some pGenesisVerificationKeyFile
+                        <*> pShelleyPParamsUpdate
 
-    pColdKeys :: Parser DevOpsCmd
-    pColdKeys = DevOpsColdKeys <$> pGenesisKeyFile
+    pProtocolUpdate :: Parser GovernanceCmd
+    pProtocolUpdate = GovernanceProtocolUpdate <$> pPrivKeyFile
+
+    pColdKeys :: Parser GovernanceCmd
+    pColdKeys = GovernanceColdKeys <$> pGenesisKeyFile
 
     pGenesisKeyFile :: Parser GenesisKeyFile
     pGenesisKeyFile =
