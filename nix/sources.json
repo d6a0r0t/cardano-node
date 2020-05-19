@@ -24,15 +24,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "haskell.nix": {
-        "branch": "master",
+        "branch": "hkm/ghc844-to-ghc865",
         "description": "Alternative Haskell Infrastructure for Nixpkgs",
         "homepage": "https://input-output-hk.github.io/haskell.nix",
         "owner": "input-output-hk",
         "repo": "haskell.nix",
-        "rev": "d43f6fcdd6a75b0c1561e988117a227454c75acb",
-        "sha256": "0bh5jik0gag0dlyfsg5n0j1n5k0xivivkgij8pxlz07a9g7m5mn9",
+        "rev": "1d86113620693b76b4727ff4447035974d4d5640",
+        "sha256": "1n7lh7vw9wmn32wjcnhq6biy0a6xa07aa5y03f8n9kq94jvhpr6a",
         "type": "tarball",
-        "url": "https://github.com/input-output-hk/haskell.nix/archive/d43f6fcdd6a75b0c1561e988117a227454c75acb.tar.gz",
+        "url": "https://github.com/input-output-hk/haskell.nix/archive/1d86113620693b76b4727ff4447035974d4d5640.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "iohk-nix": {
