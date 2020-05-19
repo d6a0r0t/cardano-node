@@ -16,10 +16,12 @@ let
   # This creates the Haskell package set.
   # https://input-output-hk.github.io/haskell.nix/user-guide/projects/
   pkgSet = haskell-nix.cabalProject {
-    src = haskell-nix.haskellLib.cleanGit {
-      name = "cardano-node";
-      src = ../.;
-    };
+    src = ../. ; #haskell-nix.haskellLib.cleanGit {
+#      name = "cardano-node";
+#      src = ../.;
+#    };
+    hpack = null;
+    #cabal-install = (import <nixpkgs> { inherit (buildPackages) system; }).cabal-install;
     ghc = buildPackages.haskell-nix.compiler.${compiler};
     modules = [
 
